@@ -1,2 +1,1 @@
-# github-hoverboard
-hoverboard-firmware-hack
+Novo repositorio particular do hoverboard-hack
