@@ -5,9 +5,9 @@
 * $Revision: 	V.1.4.5
 *    
 * Project: 	    CMSIS DSP Library    
-* Title:		arm_abs_f32.c    
+* Title:		arm_scale_f32.c    
 *    
-* Description:	Vector absolute value.    
+* Description:	Multiplies a floating-point vector by a scalar.    
 *    
 * Target Processor: Cortex-M4/Cortex-M3/Cortex-M0
 *  
@@ -35,108 +35,112 @@
 * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.   
+* POSSIBILITY OF SUCH DAMAGE.    
 * ---------------------------------------------------------------------------- */
 
 #include "arm_math.h"
-#include <math.h>
 
 /**        
  * @ingroup groupMath        
  */
 
 /**        
- * @defgroup BasicAbs Vector Absolute Value        
+ * @defgroup scale Vector Scale        
  *        
- * Computes the absolute value of a vector on an element-by-element basis.        
+ * Multiply a vector by a scalar value.  For floating-point data, the algorithm used is:        
  *        
  * <pre>        
- *     pDst[n] = abs(pSrc[n]),   0 <= n < blockSize.        
+ *     pDst[n] = pSrc[n] * scale,   0 <= n < blockSize.        
  * </pre>        
  *        
- * The functions support in-place computation allowing the source and
- * destination pointers to reference the same memory buffer.
- * There are separate functions for floating-point, Q7, Q15, and Q31 data types.
+ * In the fixed-point Q7, Q15, and Q31 functions, <code>scale</code> is represented by        
+ * a fractional multiplication <code>scaleFract</code> and an arithmetic shift <code>shift</code>.        
+ * The shift allows the gain of the scaling operation to exceed 1.0.        
+ * The algorithm used with fixed-point data is:        
+ *        
+ * <pre>        
+ *     pDst[n] = (pSrc[n] * scaleFract) << shift,   0 <= n < blockSize.        
+ * </pre>        
+ *        
+ * The overall scale factor applied to the fixed-point data is        
+ * <pre>        
+ *     scale = scaleFract * 2^shift.        
+ * </pre>        
+ *
+ * The functions support in-place computation allowing the source and destination
+ * pointers to reference the same memory buffer.
  */
 
 /**        
- * @addtogroup BasicAbs        
+ * @addtogroup scale        
  * @{        
  */
 
 /**        
- * @brief Floating-point vector absolute value.        
- * @param[in]       *pSrc points to the input buffer        
- * @param[out]      *pDst points to the output buffer        
- * @param[in]       blockSize number of samples in each vector        
+ * @brief Multiplies a floating-point vector by a scalar.        
+ * @param[in]       *pSrc points to the input vector        
+ * @param[in]       scale scale factor to be applied        
+ * @param[out]      *pDst points to the output vector        
+ * @param[in]       blockSize number of samples in the vector        
  * @return none.        
  */
 
-void arm_abs_f32(
+
+void arm_scale_f32(
   float32_t * pSrc,
+  float32_t scale,
   float32_t * pDst,
   uint32_t blockSize)
 {
   uint32_t blkCnt;                               /* loop counter */
-
 #ifndef ARM_MATH_CM0_FAMILY
 
-  /* Run the below code for Cortex-M4 and Cortex-M3 */
-  float32_t in1, in2, in3, in4;                  /* temporary variables */
+/* Run the below code for Cortex-M4 and Cortex-M3 */
+  float32_t in1, in2, in3, in4;                  /* temporary variabels */
 
   /*loop Unrolling */
   blkCnt = blockSize >> 2u;
 
-  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.    
+  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.        
    ** a second loop below computes the remaining 1 to 3 samples. */
   while(blkCnt > 0u)
   {
-    /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    /* read sample from source */
+    /* C = A * scale */
+    /* Scale the input and then store the results in the destination buffer. */
+    /* read input samples from source */
     in1 = *pSrc;
     in2 = *(pSrc + 1);
+
+    /* multiply with scaling factor */
+    in1 = in1 * scale;
+
+    /* read input sample from source */
     in3 = *(pSrc + 2);
 
-    /* find absolute value */
-    in1 = fabsf(in1);
+    /* multiply with scaling factor */
+    in2 = in2 * scale;
 
-    /* read sample from source */
+    /* read input sample from source */
     in4 = *(pSrc + 3);
 
-    /* find absolute value */
-    in2 = fabsf(in2);
-
-    /* read sample from source */
+    /* multiply with scaling factor */
+    in3 = in3 * scale;
+    in4 = in4 * scale;
+    /* store the result to destination */
     *pDst = in1;
-
-    /* find absolute value */
-    in3 = fabsf(in3);
-
-    /* find absolute value */
-    in4 = fabsf(in4);
-
-    /* store result to destination */
     *(pDst + 1) = in2;
-
-    /* store result to destination */
     *(pDst + 2) = in3;
-
-    /* store result to destination */
     *(pDst + 3) = in4;
 
-
-    /* Update source pointer to process next sampels */
+    /* update pointers to process next samples */
     pSrc += 4u;
-
-    /* Update destination pointer to process next sampels */
     pDst += 4u;
 
     /* Decrement the loop counter */
     blkCnt--;
   }
 
-  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
+  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.        
    ** No loop unrolling is used. */
   blkCnt = blockSize % 0x4u;
 
@@ -147,13 +151,13 @@ void arm_abs_f32(
   /* Initialize blkCnt with number of samples */
   blkCnt = blockSize;
 
-#endif /*   #ifndef ARM_MATH_CM0_FAMILY   */
+#endif /* #ifndef ARM_MATH_CM0_FAMILY */
 
   while(blkCnt > 0u)
   {
-    /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    *pDst++ = fabsf(*pSrc++);
+    /* C = A * scale */
+    /* Scale the input and then store the result in the destination buffer. */
+    *pDst++ = (*pSrc++) * scale;
 
     /* Decrement the loop counter */
     blkCnt--;
@@ -161,5 +165,5 @@ void arm_abs_f32(
 }
 
 /**        
- * @} end of BasicAbs group        
+ * @} end of scale group        
  */

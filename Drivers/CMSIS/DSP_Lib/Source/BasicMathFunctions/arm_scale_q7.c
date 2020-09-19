@@ -5,9 +5,9 @@
 * $Revision: 	V.1.4.5
 *    
 * Project: 	    CMSIS DSP Library    
-* Title:		arm_abs_f32.c    
+* Title:		arm_scale_q7.c    
 *    
-* Description:	Vector absolute value.    
+* Description:	Multiplies a Q7 vector by a scalar.    
 *    
 * Target Processor: Cortex-M4/Cortex-M3/Cortex-M0
 *  
@@ -35,102 +35,75 @@
 * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.   
-* ---------------------------------------------------------------------------- */
+* POSSIBILITY OF SUCH DAMAGE.  
+* -------------------------------------------------------------------- */
 
 #include "arm_math.h"
-#include <math.h>
 
-/**        
- * @ingroup groupMath        
+/**    
+ * @ingroup groupMath    
  */
 
-/**        
- * @defgroup BasicAbs Vector Absolute Value        
- *        
- * Computes the absolute value of a vector on an element-by-element basis.        
- *        
- * <pre>        
- *     pDst[n] = abs(pSrc[n]),   0 <= n < blockSize.        
- * </pre>        
- *        
- * The functions support in-place computation allowing the source and
- * destination pointers to reference the same memory buffer.
- * There are separate functions for floating-point, Q7, Q15, and Q31 data types.
+/**    
+ * @addtogroup scale    
+ * @{    
  */
 
-/**        
- * @addtogroup BasicAbs        
- * @{        
+/**    
+ * @brief Multiplies a Q7 vector by a scalar.    
+ * @param[in]       *pSrc points to the input vector    
+ * @param[in]       scaleFract fractional portion of the scale value    
+ * @param[in]       shift number of bits to shift the result by    
+ * @param[out]      *pDst points to the output vector    
+ * @param[in]       blockSize number of samples in the vector    
+ * @return none.    
+ *    
+ * <b>Scaling and Overflow Behavior:</b>    
+ * \par    
+ * The input data <code>*pSrc</code> and <code>scaleFract</code> are in 1.7 format.    
+ * These are multiplied to yield a 2.14 intermediate result and this is shifted with saturation to 1.7 format.    
  */
 
-/**        
- * @brief Floating-point vector absolute value.        
- * @param[in]       *pSrc points to the input buffer        
- * @param[out]      *pDst points to the output buffer        
- * @param[in]       blockSize number of samples in each vector        
- * @return none.        
- */
-
-void arm_abs_f32(
-  float32_t * pSrc,
-  float32_t * pDst,
+void arm_scale_q7(
+  q7_t * pSrc,
+  q7_t scaleFract,
+  int8_t shift,
+  q7_t * pDst,
   uint32_t blockSize)
 {
+  int8_t kShift = 7 - shift;                     /* shift to apply after scaling */
   uint32_t blkCnt;                               /* loop counter */
 
 #ifndef ARM_MATH_CM0_FAMILY
 
-  /* Run the below code for Cortex-M4 and Cortex-M3 */
-  float32_t in1, in2, in3, in4;                  /* temporary variables */
+/* Run the below code for Cortex-M4 and Cortex-M3 */
+  q7_t in1, in2, in3, in4, out1, out2, out3, out4;      /* Temporary variables to store input & output */
+
 
   /*loop Unrolling */
   blkCnt = blockSize >> 2u;
+
 
   /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.    
    ** a second loop below computes the remaining 1 to 3 samples. */
   while(blkCnt > 0u)
   {
-    /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    /* read sample from source */
-    in1 = *pSrc;
-    in2 = *(pSrc + 1);
-    in3 = *(pSrc + 2);
+    /* Reading 4 inputs from memory */
+    in1 = *pSrc++;
+    in2 = *pSrc++;
+    in3 = *pSrc++;
+    in4 = *pSrc++;
 
-    /* find absolute value */
-    in1 = fabsf(in1);
+    /* C = A * scale */
+    /* Scale the inputs and then store the results in the temporary variables. */
+    out1 = (q7_t) (__SSAT(((in1) * scaleFract) >> kShift, 8));
+    out2 = (q7_t) (__SSAT(((in2) * scaleFract) >> kShift, 8));
+    out3 = (q7_t) (__SSAT(((in3) * scaleFract) >> kShift, 8));
+    out4 = (q7_t) (__SSAT(((in4) * scaleFract) >> kShift, 8));
 
-    /* read sample from source */
-    in4 = *(pSrc + 3);
-
-    /* find absolute value */
-    in2 = fabsf(in2);
-
-    /* read sample from source */
-    *pDst = in1;
-
-    /* find absolute value */
-    in3 = fabsf(in3);
-
-    /* find absolute value */
-    in4 = fabsf(in4);
-
-    /* store result to destination */
-    *(pDst + 1) = in2;
-
-    /* store result to destination */
-    *(pDst + 2) = in3;
-
-    /* store result to destination */
-    *(pDst + 3) = in4;
-
-
-    /* Update source pointer to process next sampels */
-    pSrc += 4u;
-
-    /* Update destination pointer to process next sampels */
-    pDst += 4u;
+    /* Packing the individual outputs into 32bit and storing in    
+     * destination buffer in single write */
+    *__SIMD32(pDst)++ = __PACKq7(out1, out2, out3, out4);
 
     /* Decrement the loop counter */
     blkCnt--;
@@ -140,6 +113,16 @@ void arm_abs_f32(
    ** No loop unrolling is used. */
   blkCnt = blockSize % 0x4u;
 
+  while(blkCnt > 0u)
+  {
+    /* C = A * scale */
+    /* Scale the input and then store the result in the destination buffer. */
+    *pDst++ = (q7_t) (__SSAT(((*pSrc++) * scaleFract) >> kShift, 8));
+
+    /* Decrement the loop counter */
+    blkCnt--;
+  }
+
 #else
 
   /* Run the below code for Cortex-M0 */
@@ -147,19 +130,20 @@ void arm_abs_f32(
   /* Initialize blkCnt with number of samples */
   blkCnt = blockSize;
 
-#endif /*   #ifndef ARM_MATH_CM0_FAMILY   */
-
   while(blkCnt > 0u)
   {
-    /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    *pDst++ = fabsf(*pSrc++);
+    /* C = A * scale */
+    /* Scale the input and then store the result in the destination buffer. */
+    *pDst++ = (q7_t) (__SSAT((((q15_t) * pSrc++ * scaleFract) >> kShift), 8));
 
     /* Decrement the loop counter */
     blkCnt--;
   }
+
+#endif /* #ifndef ARM_MATH_CM0_FAMILY */
+
 }
 
-/**        
- * @} end of BasicAbs group        
+/**    
+ * @} end of scale group    
  */

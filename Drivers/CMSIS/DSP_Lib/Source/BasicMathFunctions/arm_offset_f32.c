@@ -5,9 +5,9 @@
 * $Revision: 	V.1.4.5
 *    
 * Project: 	    CMSIS DSP Library    
-* Title:		arm_abs_f32.c    
+* Title:		arm_offset_f32.c    
 *    
-* Description:	Vector absolute value.    
+* Description:	Floating-point vector offset.    
 *    
 * Target Processor: Cortex-M4/Cortex-M3/Cortex-M0
 *  
@@ -37,21 +37,19 @@
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.   
 * ---------------------------------------------------------------------------- */
-
 #include "arm_math.h"
-#include <math.h>
 
 /**        
  * @ingroup groupMath        
  */
 
 /**        
- * @defgroup BasicAbs Vector Absolute Value        
+ * @defgroup offset Vector Offset        
  *        
- * Computes the absolute value of a vector on an element-by-element basis.        
+ * Adds a constant offset to each element of a vector.        
  *        
  * <pre>        
- *     pDst[n] = abs(pSrc[n]),   0 <= n < blockSize.        
+ *     pDst[n] = pSrc[n] + offset,   0 <= n < blockSize.        
  * </pre>        
  *        
  * The functions support in-place computation allowing the source and
@@ -60,20 +58,23 @@
  */
 
 /**        
- * @addtogroup BasicAbs        
+ * @addtogroup offset        
  * @{        
  */
 
 /**        
- * @brief Floating-point vector absolute value.        
- * @param[in]       *pSrc points to the input buffer        
- * @param[out]      *pDst points to the output buffer        
- * @param[in]       blockSize number of samples in each vector        
+ * @brief  Adds a constant offset to a floating-point vector.        
+ * @param[in]  *pSrc points to the input vector        
+ * @param[in]  offset is the offset to be added        
+ * @param[out]  *pDst points to the output vector        
+ * @param[in]  blockSize number of samples in the vector        
  * @return none.        
  */
 
-void arm_abs_f32(
+
+void arm_offset_f32(
   float32_t * pSrc,
+  float32_t offset,
   float32_t * pDst,
   uint32_t blockSize)
 {
@@ -81,40 +82,42 @@ void arm_abs_f32(
 
 #ifndef ARM_MATH_CM0_FAMILY
 
-  /* Run the below code for Cortex-M4 and Cortex-M3 */
-  float32_t in1, in2, in3, in4;                  /* temporary variables */
+/* Run the below code for Cortex-M4 and Cortex-M3 */
+  float32_t in1, in2, in3, in4;
 
   /*loop Unrolling */
   blkCnt = blockSize >> 2u;
 
-  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.    
+  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.        
    ** a second loop below computes the remaining 1 to 3 samples. */
   while(blkCnt > 0u)
   {
-    /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    /* read sample from source */
+    /* C = A + offset */
+    /* Add offset and then store the results in the destination buffer. */
+    /* read samples from source */
     in1 = *pSrc;
     in2 = *(pSrc + 1);
+
+    /* add offset to input */
+    in1 = in1 + offset;
+
+    /* read samples from source */
     in3 = *(pSrc + 2);
 
-    /* find absolute value */
-    in1 = fabsf(in1);
+    /* add offset to input */
+    in2 = in2 + offset;
 
-    /* read sample from source */
+    /* read samples from source */
     in4 = *(pSrc + 3);
 
-    /* find absolute value */
-    in2 = fabsf(in2);
+    /* add offset to input */
+    in3 = in3 + offset;
 
-    /* read sample from source */
+    /* store result to destination */
     *pDst = in1;
 
-    /* find absolute value */
-    in3 = fabsf(in3);
-
-    /* find absolute value */
-    in4 = fabsf(in4);
+    /* add offset to input */
+    in4 = in4 + offset;
 
     /* store result to destination */
     *(pDst + 1) = in2;
@@ -125,18 +128,15 @@ void arm_abs_f32(
     /* store result to destination */
     *(pDst + 3) = in4;
 
-
-    /* Update source pointer to process next sampels */
+    /* update pointers to process next samples */
     pSrc += 4u;
-
-    /* Update destination pointer to process next sampels */
     pDst += 4u;
 
     /* Decrement the loop counter */
     blkCnt--;
   }
 
-  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
+  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.        
    ** No loop unrolling is used. */
   blkCnt = blockSize % 0x4u;
 
@@ -147,13 +147,13 @@ void arm_abs_f32(
   /* Initialize blkCnt with number of samples */
   blkCnt = blockSize;
 
-#endif /*   #ifndef ARM_MATH_CM0_FAMILY   */
+#endif /* #ifndef ARM_MATH_CM0_FAMILY */
 
   while(blkCnt > 0u)
   {
-    /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    *pDst++ = fabsf(*pSrc++);
+    /* C = A + offset */
+    /* Add offset and then store the result in the destination buffer. */
+    *pDst++ = (*pSrc++) + offset;
 
     /* Decrement the loop counter */
     blkCnt--;
@@ -161,5 +161,5 @@ void arm_abs_f32(
 }
 
 /**        
- * @} end of BasicAbs group        
+ * @} end of offset group        
  */

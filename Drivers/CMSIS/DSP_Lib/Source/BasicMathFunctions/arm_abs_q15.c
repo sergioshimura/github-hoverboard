@@ -5,9 +5,9 @@
 * $Revision: 	V.1.4.5
 *    
 * Project: 	    CMSIS DSP Library    
-* Title:		arm_abs_f32.c    
+* Title:		arm_abs_q15.c    
 *    
-* Description:	Vector absolute value.    
+* Description:	Q15 vector absolute value.    
 *    
 * Target Processor: Cortex-M4/Cortex-M3/Cortex-M0
 *  
@@ -35,131 +35,145 @@
 * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.   
-* ---------------------------------------------------------------------------- */
+* POSSIBILITY OF SUCH DAMAGE. 
+* -------------------------------------------------------------------- */
 
 #include "arm_math.h"
-#include <math.h>
 
-/**        
- * @ingroup groupMath        
+/**    
+ * @ingroup groupMath    
  */
 
-/**        
- * @defgroup BasicAbs Vector Absolute Value        
- *        
- * Computes the absolute value of a vector on an element-by-element basis.        
- *        
- * <pre>        
- *     pDst[n] = abs(pSrc[n]),   0 <= n < blockSize.        
- * </pre>        
- *        
- * The functions support in-place computation allowing the source and
- * destination pointers to reference the same memory buffer.
- * There are separate functions for floating-point, Q7, Q15, and Q31 data types.
+/**    
+ * @addtogroup BasicAbs    
+ * @{    
  */
 
-/**        
- * @addtogroup BasicAbs        
- * @{        
+/**    
+ * @brief Q15 vector absolute value.    
+ * @param[in]       *pSrc points to the input buffer    
+ * @param[out]      *pDst points to the output buffer    
+ * @param[in]       blockSize number of samples in each vector    
+ * @return none.    
+ *    
+ * <b>Scaling and Overflow Behavior:</b>    
+ * \par    
+ * The function uses saturating arithmetic.    
+ * The Q15 value -1 (0x8000) will be saturated to the maximum allowable positive value 0x7FFF.    
  */
 
-/**        
- * @brief Floating-point vector absolute value.        
- * @param[in]       *pSrc points to the input buffer        
- * @param[out]      *pDst points to the output buffer        
- * @param[in]       blockSize number of samples in each vector        
- * @return none.        
- */
-
-void arm_abs_f32(
-  float32_t * pSrc,
-  float32_t * pDst,
+void arm_abs_q15(
+  q15_t * pSrc,
+  q15_t * pDst,
   uint32_t blockSize)
 {
   uint32_t blkCnt;                               /* loop counter */
 
 #ifndef ARM_MATH_CM0_FAMILY
+  __SIMD32_TYPE *simd;
 
-  /* Run the below code for Cortex-M4 and Cortex-M3 */
-  float32_t in1, in2, in3, in4;                  /* temporary variables */
+/* Run the below code for Cortex-M4 and Cortex-M3 */
+
+  q15_t in1;                                     /* Input value1 */
+  q15_t in2;                                     /* Input value2 */
+
 
   /*loop Unrolling */
   blkCnt = blockSize >> 2u;
 
   /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.    
    ** a second loop below computes the remaining 1 to 3 samples. */
+  simd = __SIMD32_CONST(pDst);
   while(blkCnt > 0u)
   {
     /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    /* read sample from source */
-    in1 = *pSrc;
-    in2 = *(pSrc + 1);
-    in3 = *(pSrc + 2);
-
-    /* find absolute value */
-    in1 = fabsf(in1);
-
-    /* read sample from source */
-    in4 = *(pSrc + 3);
-
-    /* find absolute value */
-    in2 = fabsf(in2);
-
-    /* read sample from source */
-    *pDst = in1;
-
-    /* find absolute value */
-    in3 = fabsf(in3);
-
-    /* find absolute value */
-    in4 = fabsf(in4);
-
-    /* store result to destination */
-    *(pDst + 1) = in2;
-
-    /* store result to destination */
-    *(pDst + 2) = in3;
-
-    /* store result to destination */
-    *(pDst + 3) = in4;
+    /* Read two inputs */
+    in1 = *pSrc++;
+    in2 = *pSrc++;
 
 
-    /* Update source pointer to process next sampels */
-    pSrc += 4u;
+    /* Store the Absolute result in the destination buffer by packing the two values, in a single cycle */
+#ifndef  ARM_MATH_BIG_ENDIAN
+    *simd++ =
+      __PKHBT(((in1 > 0) ? in1 : (q15_t)__QSUB16(0, in1)),
+              ((in2 > 0) ? in2 : (q15_t)__QSUB16(0, in2)), 16);
 
-    /* Update destination pointer to process next sampels */
-    pDst += 4u;
+#else
+
+
+    *simd++ =
+      __PKHBT(((in2 > 0) ? in2 : (q15_t)__QSUB16(0, in2)),
+              ((in1 > 0) ? in1 : (q15_t)__QSUB16(0, in1)), 16);
+
+#endif /* #ifndef  ARM_MATH_BIG_ENDIAN    */
+
+    in1 = *pSrc++;
+    in2 = *pSrc++;
+
+
+#ifndef  ARM_MATH_BIG_ENDIAN
+
+    *simd++ =
+      __PKHBT(((in1 > 0) ? in1 : (q15_t)__QSUB16(0, in1)),
+              ((in2 > 0) ? in2 : (q15_t)__QSUB16(0, in2)), 16);
+
+#else
+
+
+    *simd++ =
+      __PKHBT(((in2 > 0) ? in2 : (q15_t)__QSUB16(0, in2)),
+              ((in1 > 0) ? in1 : (q15_t)__QSUB16(0, in1)), 16);
+
+#endif /* #ifndef  ARM_MATH_BIG_ENDIAN    */
 
     /* Decrement the loop counter */
     blkCnt--;
   }
-
+  pDst = (q15_t *)simd;
+	
   /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
    ** No loop unrolling is used. */
   blkCnt = blockSize % 0x4u;
+
+  while(blkCnt > 0u)
+  {
+    /* C = |A| */
+    /* Read the input */
+    in1 = *pSrc++;
+
+    /* Calculate absolute value of input and then store the result in the destination buffer. */
+    *pDst++ = (in1 > 0) ? in1 : (q15_t)__QSUB16(0, in1);
+
+    /* Decrement the loop counter */
+    blkCnt--;
+  }
 
 #else
 
   /* Run the below code for Cortex-M0 */
 
+  q15_t in;                                      /* Temporary input variable */
+
   /* Initialize blkCnt with number of samples */
   blkCnt = blockSize;
-
-#endif /*   #ifndef ARM_MATH_CM0_FAMILY   */
 
   while(blkCnt > 0u)
   {
     /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    *pDst++ = fabsf(*pSrc++);
+    /* Read the input */
+    in = *pSrc++;
+
+    /* Calculate absolute value of input and then store the result in the destination buffer. */
+    *pDst++ = (in > 0) ? in : ((in == (q15_t) 0x8000) ? 0x7fff : -in);
 
     /* Decrement the loop counter */
     blkCnt--;
   }
+
+#endif /* #ifndef ARM_MATH_CM0_FAMILY */
+
 }
 
-/**        
- * @} end of BasicAbs group        
+/**    
+ * @} end of BasicAbs group    
  */

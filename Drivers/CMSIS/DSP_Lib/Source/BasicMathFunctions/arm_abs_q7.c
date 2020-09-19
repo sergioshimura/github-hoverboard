@@ -5,9 +5,9 @@
 * $Revision: 	V.1.4.5
 *    
 * Project: 	    CMSIS DSP Library    
-* Title:		arm_abs_f32.c    
+* Title:		arm_abs_q7.c    
 *    
-* Description:	Vector absolute value.    
+* Description:	Q7 vector absolute value.    
 *    
 * Target Processor: Cortex-M4/Cortex-M3/Cortex-M0
 *  
@@ -35,28 +35,13 @@
 * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.   
-* ---------------------------------------------------------------------------- */
+* POSSIBILITY OF SUCH DAMAGE.
+* -------------------------------------------------------------------- */
 
 #include "arm_math.h"
-#include <math.h>
 
 /**        
  * @ingroup groupMath        
- */
-
-/**        
- * @defgroup BasicAbs Vector Absolute Value        
- *        
- * Computes the absolute value of a vector on an element-by-element basis.        
- *        
- * <pre>        
- *     pDst[n] = abs(pSrc[n]),   0 <= n < blockSize.        
- * </pre>        
- *        
- * The functions support in-place computation allowing the source and
- * destination pointers to reference the same memory buffer.
- * There are separate functions for floating-point, Q7, Q15, and Q31 data types.
  */
 
 /**        
@@ -65,24 +50,35 @@
  */
 
 /**        
- * @brief Floating-point vector absolute value.        
+ * @brief Q7 vector absolute value.        
  * @param[in]       *pSrc points to the input buffer        
  * @param[out]      *pDst points to the output buffer        
  * @param[in]       blockSize number of samples in each vector        
  * @return none.        
+ *    
+ * \par Conditions for optimum performance    
+ *  Input and output buffers should be aligned by 32-bit    
+ *    
+ *        
+ * <b>Scaling and Overflow Behavior:</b>        
+ * \par        
+ * The function uses saturating arithmetic.        
+ * The Q7 value -1 (0x80) will be saturated to the maximum allowable positive value 0x7F.        
  */
 
-void arm_abs_f32(
-  float32_t * pSrc,
-  float32_t * pDst,
+void arm_abs_q7(
+  q7_t * pSrc,
+  q7_t * pDst,
   uint32_t blockSize)
 {
   uint32_t blkCnt;                               /* loop counter */
+  q7_t in;                                       /* Input value1 */
 
 #ifndef ARM_MATH_CM0_FAMILY
 
   /* Run the below code for Cortex-M4 and Cortex-M3 */
-  float32_t in1, in2, in3, in4;                  /* temporary variables */
+  q31_t in1, in2, in3, in4;                      /* temporary input variables */
+  q31_t out1, out2, out3, out4;                  /* temporary output variables */
 
   /*loop Unrolling */
   blkCnt = blockSize >> 2u;
@@ -92,44 +88,40 @@ void arm_abs_f32(
   while(blkCnt > 0u)
   {
     /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    /* read sample from source */
-    in1 = *pSrc;
-    in2 = *(pSrc + 1);
-    in3 = *(pSrc + 2);
+    /* Read inputs */
+    in1 = (q31_t) * pSrc;
+    in2 = (q31_t) * (pSrc + 1);
+    in3 = (q31_t) * (pSrc + 2);
 
     /* find absolute value */
-    in1 = fabsf(in1);
+    out1 = (in1 > 0) ? in1 : (q31_t)__QSUB8(0, in1);
 
-    /* read sample from source */
-    in4 = *(pSrc + 3);
-
-    /* find absolute value */
-    in2 = fabsf(in2);
-
-    /* read sample from source */
-    *pDst = in1;
+    /* read input */
+    in4 = (q31_t) * (pSrc + 3);
 
     /* find absolute value */
-    in3 = fabsf(in3);
-
-    /* find absolute value */
-    in4 = fabsf(in4);
+    out2 = (in2 > 0) ? in2 : (q31_t)__QSUB8(0, in2);
 
     /* store result to destination */
-    *(pDst + 1) = in2;
+    *pDst = (q7_t) out1;
+
+    /* find absolute value */
+    out3 = (in3 > 0) ? in3 : (q31_t)__QSUB8(0, in3);
+
+    /* find absolute value */
+    out4 = (in4 > 0) ? in4 : (q31_t)__QSUB8(0, in4);
 
     /* store result to destination */
-    *(pDst + 2) = in3;
+    *(pDst + 1) = (q7_t) out2;
 
     /* store result to destination */
-    *(pDst + 3) = in4;
+    *(pDst + 2) = (q7_t) out3;
 
+    /* store result to destination */
+    *(pDst + 3) = (q7_t) out4;
 
-    /* Update source pointer to process next sampels */
+    /* update pointers to process next samples */
     pSrc += 4u;
-
-    /* Update destination pointer to process next sampels */
     pDst += 4u;
 
     /* Decrement the loop counter */
@@ -139,21 +131,21 @@ void arm_abs_f32(
   /* If the blockSize is not a multiple of 4, compute any remaining output samples here.    
    ** No loop unrolling is used. */
   blkCnt = blockSize % 0x4u;
-
 #else
 
   /* Run the below code for Cortex-M0 */
-
-  /* Initialize blkCnt with number of samples */
   blkCnt = blockSize;
 
-#endif /*   #ifndef ARM_MATH_CM0_FAMILY   */
+#endif /* #define ARM_MATH_CM0_FAMILY */
 
   while(blkCnt > 0u)
   {
     /* C = |A| */
-    /* Calculate absolute and then store the results in the destination buffer. */
-    *pDst++ = fabsf(*pSrc++);
+    /* Read the input */
+    in = *pSrc++;
+
+    /* Store the Absolute result in the destination buffer */
+    *pDst++ = (in > 0) ? in : ((in == (q7_t) 0x80) ? 0x7f : -in);
 
     /* Decrement the loop counter */
     blkCnt--;
