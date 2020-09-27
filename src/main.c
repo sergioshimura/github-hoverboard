@@ -362,7 +362,7 @@ int main(void) {
     #endif
       {
       cmd1 = CLAMP((int16_t)command.steer, -1000, 1000);
-      cmd2 = CLAMP((int16_t)command.speed, -1000, 1000);
+      cmd2 = CLAMP((int16_t)command.speed, -3000, 3000);   // Shimura 27/09/2020
       } else
       {
     	  cmd1 = 0;

@@ -118,9 +118,9 @@
 #define FILTER              0.1  // lower value == softer filter. do not use values <0.01, you will get float precision issues.
 #define SPEED_COEFFICIENT   0.5  // higher value == stronger. 0.0 to ~2.0?
 #define STEER_COEFFICIENT   0.5  // higher value == stronger. if you do not want any steering, set it to 0.0; 0.0 to 1.0
-#define INVERT_R_DIRECTION
-#define INVERT_L_DIRECTION
-//#define SWITCH_WHEELS            // switch right and left wheel. Watch out, you probably also need to invert directions.
+//#define INVERT_R_DIRECTION Shimura 27/09/2020 Comentei
+//#define INVERT_L_DIRECTION Shimura 27/09/2020 Comentei
+#define SWITCH_WHEELS            // switch right and left wheel. Watch out, you probably also need to invert directions. Shimura 27/09/2020 descomentei
 
 #define BEEPS_BACKWARD 1    // 0 or 1
 
