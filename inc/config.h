@@ -116,7 +116,7 @@
 // - weakr and weakl: field weakening for extra boost at high speed (speedR > 700 and speedL > 700). 0 to ~400
 
 #define FILTER              0.1  // lower value == softer filter. do not use values <0.01, you will get float precision issues.
-#define SPEED_COEFFICIENT   0.5  // higher value == stronger. 0.0 to ~2.0?
+#define SPEED_COEFFICIENT   2.0  // higher value == stronger. 0.0 to ~2.0?  // Shimura 27/09/2020 mudei de 0.5 para 2.0
 #define STEER_COEFFICIENT   0.5  // higher value == stronger. if you do not want any steering, set it to 0.0; 0.0 to 1.0
 //#define INVERT_R_DIRECTION Shimura 27/09/2020 Comentei
 //#define INVERT_L_DIRECTION Shimura 27/09/2020 Comentei
