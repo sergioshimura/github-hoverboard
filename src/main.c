@@ -389,11 +389,11 @@ int main(void) {
 
     // ####### MIXER #######
     #ifdef SWITCH_WHEELS
-      speedL = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -1000, 1000);
-      speedR = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -1000, 1000);
+      speedL = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
+      speedR = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
     #else
-      speedR = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -1000, 1000);
-      speedL = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -1000, 1000);
+      speedR = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
+      speedL = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
     #endif
 
     #ifdef ADDITIONAL_CODE
