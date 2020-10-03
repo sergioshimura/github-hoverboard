@@ -87,7 +87,7 @@
 #define ADC1_ZERO     2000        // ADC1-value while poti at zero-position (0 - 4095) Shimura era 1500 mudei para 2000 para ficar no meio
 #define ADC1_MAX      4095        // max ADC1-value while poti at maximum-position (0 - 4095)
 #define ADC1_MULT_NEG 1500.0f     // Use 1000.0f to calibrate form MIN to MAX Shimura era 500 mudei para 1500 para dar maxima velocidade para ré tb teste com 1000 para ver se o pot vai até o final de curso pra ré
-#define ADC1_MULT_POS 1500.0f     // Use 1000.0f to calibrate form MIN to MAX era 1500 mudei para 1000 para ver se ele mantem a velocidade final mas resolve o problema do pot nao ir linear até o final. ele satura em 3/4
+#define ADC1_MULT_POS 1500.0f     // Use 1000.0f to calibrate form MIN to MAX era 1500 mudei para 1000 para ver se ele mantem a velocidade final mas resolve o problema do pot nao ir linear até o final. ele satura em 3/4. com 1000 nao resolve. Com 1500 (ou maior) fica mais rapido
 
 #define ADC2_MIN         0        // min ADC2-value while poti at minimum-position (0 - 4095)
 #define ADC2_ZERO     2000        // ADC2-value while poti at zero-position (0 - 4095)
@@ -118,9 +118,9 @@
 #define FILTER              0.1  // lower value == softer filter. do not use values <0.01, you will get float precision issues.
 #define SPEED_COEFFICIENT   0.5  // higher value == stronger. 0.0 to ~2.0?  // Shimura 27/09/2020 mudei de 0.5 para 2.0
 #define STEER_COEFFICIENT   0.5  // higher value == stronger. if you do not want any steering, set it to 0.0; 0.0 to 1.0
-#define INVERT_R_DIRECTION //Shimura 27/09/2020 Comentei em 02/10/2020 descomentei
-#define INVERT_L_DIRECTION //Shimura 27/09/2020 Comentei em 02/10/2020 descomentei
-#define SWITCH_WHEELS            // switch right and left wheel. Watch out, you probably also need to invert directions. Shimura 27/09/2020 descomentei
+//#define INVERT_R_DIRECTION //Shimura em 03/10/2020 comentei comentando estas 3 linhas, o motor gira no sentido do IZI2 e a roda oposta fica compativel
+//#define INVERT_L_DIRECTION //Shimura em 03/10/2020 comentei
+//#define SWITCH_WHEELS            // switch right and left wheel. Watch out, you probably also need to invert directions. Shimura em 03/10/2020 comentei
 
 #define BEEPS_BACKWARD 1    // 0 or 1
 
