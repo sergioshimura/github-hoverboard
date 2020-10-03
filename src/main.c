@@ -303,12 +303,11 @@ int main(void) {
 
         if(adc_buffer.l_tx2 < ADC1_ZERO) {
           cmd2_ADC = (CLAMP(adc_buffer.l_tx2, ADC1_MIN, ADC1_ZERO) - ADC1_ZERO) / ((ADC1_ZERO - ADC1_MIN) / ADC1_MULT_NEG); // ADC1 - Speed
-		  cmd2_ADC = -1000; // ADC1 - Speed
         } else {
           cmd2_ADC = (CLAMP(adc_buffer.l_tx2, ADC1_ZERO, ADC1_MAX) - ADC1_ZERO) / ((ADC1_MAX - ADC1_ZERO) / ADC1_MULT_POS); // ADC1 - Speed
         }
 
-        if((adc_buffer.l_tx2 < ADC_OFF_START) || (adc_buffer.l_tx2 > ADC_OFF_END) ) {
+/*         if((adc_buffer.l_tx2 < ADC_OFF_START) || (adc_buffer.l_tx2 > ADC_OFF_END) ) {  // Shimura 03/10/2020 retirei isso. trava na ré abaixo de 0,8V
           ADCcontrolActive = true;
         } else {
           if(ADCcontrolActive) {
@@ -316,7 +315,7 @@ int main(void) {
             cmd2 = 0;
           }
           ADCcontrolActive = false;
-        }
+        } */
 
       #else
 
