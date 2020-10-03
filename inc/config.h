@@ -84,7 +84,7 @@
 // ADC-calibration to cover the full poti-range: connect potis to left sensor board cable (0 to 3.3V) (do NOT use the red 15V wire in the cable!). see <How to calibrate>. turn the potis to minimum position, write value 1 to ADC1_MIN and value 2 to ADC2_MIN. turn to maximum position and repeat it for ADC?_MAX. make, flash and test it.
 #define CONTROL_ADC               // use ADC as input. disable DEBUG_SERIAL_USART2!
 #define ADC1_MIN         0        // min ADC1-value while poti at minimum-position (0 - 4095)
-#define ADC1_ZERO     2047        // ADC1-value while poti at zero-position (0 - 4095) Shimura era 1500 mudei para 2047 para ficar no meio
+#define ADC1_ZERO     2000        // ADC1-value while poti at zero-position (0 - 4095) Shimura era 1500 mudei para 2000 para ficar no meio
 #define ADC1_MAX      4095        // max ADC1-value while poti at maximum-position (0 - 4095)
 #define ADC1_MULT_NEG 1500.0f     // Use 1000.0f to calibrate form MIN to MAX Shimura era 500 mudei para 1500 para dar maxima velocidade para ré tb
 #define ADC1_MULT_POS 1500.0f     // Use 1000.0f to calibrate form MIN to MAX
@@ -118,8 +118,8 @@
 #define FILTER              0.1  // lower value == softer filter. do not use values <0.01, you will get float precision issues.
 #define SPEED_COEFFICIENT   0.5  // higher value == stronger. 0.0 to ~2.0?  // Shimura 27/09/2020 mudei de 0.5 para 2.0
 #define STEER_COEFFICIENT   0.5  // higher value == stronger. if you do not want any steering, set it to 0.0; 0.0 to 1.0
-//#define INVERT_R_DIRECTION Shimura 27/09/2020 Comentei
-//#define INVERT_L_DIRECTION Shimura 27/09/2020 Comentei
+#define INVERT_R_DIRECTION //Shimura 27/09/2020 Comentei em 02/10/2020 descomentei
+#define INVERT_L_DIRECTION //Shimura 27/09/2020 Comentei em 02/10/2020 descomentei
 #define SWITCH_WHEELS            // switch right and left wheel. Watch out, you probably also need to invert directions. Shimura 27/09/2020 descomentei
 
 #define BEEPS_BACKWARD 1    // 0 or 1

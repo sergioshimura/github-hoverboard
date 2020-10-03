@@ -362,7 +362,7 @@ int main(void) {
     #endif
       {
       cmd1 = CLAMP((int16_t)command.steer, -1000, 1000);
-      cmd2 = CLAMP((int16_t)command.speed, -3000, 3000);   // Shimura 27/09/2020
+      cmd2 = CLAMP((int16_t)command.speed, -1000, 1000);   // Shimura mudei de 1000 para 3000 (nao adiantou) 27/09/2020
       } else
       {
     	  cmd1 = 0;
@@ -389,11 +389,11 @@ int main(void) {
 
     // ####### MIXER #######
     #ifdef SWITCH_WHEELS
-      speedL = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
-      speedR = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
+      speedL = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -1000, 1000); // Shimura 27/09/2020 mudei para 3000
+      speedR = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -1000, 1000); // Shimura 27/09/2020 mudei para 3000
     #else
-      speedR = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
-      speedL = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -3000, 3000); // Shimura 27/09/2020 mudei para 3000
+      speedR = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -1000, 1000); // Shimura 27/09/2020 mudei para 3000
+      speedL = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -1000, 1000); // Shimura 27/09/2020 mudei para 3000
     #endif
 
     #ifdef ADDITIONAL_CODE
@@ -470,7 +470,7 @@ int main(void) {
     } else if (batteryVoltage < ((float)BAT_LOW_LVL2 * (float)BAT_NUMBER_OF_CELLS) && batteryVoltage > ((float)BAT_LOW_DEAD * (float)BAT_NUMBER_OF_CELLS) && BAT_LOW_LVL2_ENABLE) {  // low bat 2: fast beep
       buzzerFreq = 5;
       buzzerPattern = 6;
-    } else if (BEEPS_BACKWARD && speed < -50) {  // backward beep
+    } else if (BEEPS_BACKWARD && speed < -100) {  // backward beep Shimura mudei de -50 para -100 pq ele fica bipando de bobeira quando parado
       buzzerFreq = 5;
       buzzerPattern = 1;
     } else {  // do not beep
