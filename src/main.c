@@ -307,15 +307,16 @@ int main(void) {
           cmd2_ADC = (CLAMP(adc_buffer.l_tx2, ADC1_ZERO, ADC1_MAX) - ADC1_ZERO) / ((ADC1_MAX - ADC1_ZERO) / ADC1_MULT_POS); // ADC1 - Speed
         }
 
-/*         if((adc_buffer.l_tx2 < ADC_OFF_START) || (adc_buffer.l_tx2 > ADC_OFF_END) ) {  // Shimura 03/10/2020 retirei isso. trava na ré abaixo de 0,8V
+         if((adc_buffer.l_tx2 < ADC_OFF_START) || (adc_buffer.l_tx2 > ADC_OFF_END) ) {  
           ADCcontrolActive = true;
         } else {
           if(ADCcontrolActive) {
             cmd1 = 0;
-            cmd2 = 0;
+//            cmd2 = 0;	// Shimura 03/10/2020 retirei isso. trava na ré abaixo de 0,8V
+			cmd2 = cmd2_ADC;
           }
           ADCcontrolActive = false;
-        } */
+        }
 
       #else
 
