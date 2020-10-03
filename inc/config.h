@@ -86,8 +86,8 @@
 #define ADC1_MIN         0        // min ADC1-value while poti at minimum-position (0 - 4095)
 #define ADC1_ZERO     2000        // ADC1-value while poti at zero-position (0 - 4095) Shimura era 1500 mudei para 2000 para ficar no meio
 #define ADC1_MAX      4095        // max ADC1-value while poti at maximum-position (0 - 4095)
-#define ADC1_MULT_NEG 1000.0f     // Use 1000.0f to calibrate form MIN to MAX Shimura era 500 mudei para 1500 para dar maxima velocidade para ré tb teste com 1000 para ver se o pot vai até o final de curso pra ré
-#define ADC1_MULT_POS 1000.0f     // Use 1000.0f to calibrate form MIN to MAX era 1500 mudei para 1000 para ver se ele mantem a velocidade final mas resolve o problema do pot nao ir linear até o final. ele satura em 3/4
+#define ADC1_MULT_NEG 2000.0f     // Use 1000.0f to calibrate form MIN to MAX Shimura era 500 mudei para 1500 para dar maxima velocidade para ré tb teste com 1000 para ver se o pot vai até o final de curso pra ré
+#define ADC1_MULT_POS 2000.0f     // Use 1000.0f to calibrate form MIN to MAX era 1500 mudei para 1000 para ver se ele mantem a velocidade final mas resolve o problema do pot nao ir linear até o final. ele satura em 3/4
 
 #define ADC2_MIN         0        // min ADC2-value while poti at minimum-position (0 - 4095)
 #define ADC2_ZERO     2000        // ADC2-value while poti at zero-position (0 - 4095)
