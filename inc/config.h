@@ -121,7 +121,7 @@
 //#define INVERT_R_DIRECTION //Shimura em 03/10/2020 comentei comentando estas 3 linhas, o motor gira no sentido do IZI2 e a roda oposta fica compativel
 //#define INVERT_L_DIRECTION //Shimura em 03/10/2020 comentei
 //#define SWITCH_WHEELS            // switch right and left wheel. Watch out, you probably also need to invert directions. Shimura em 03/10/2020 comentei
-
+// teste do sistema smartgit
 #define BEEPS_BACKWARD 1    // 0 or 1
 
 //Turbo boost at high speeds while button1 is pressed:
